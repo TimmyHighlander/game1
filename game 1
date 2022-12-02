@@ -1,0 +1,152 @@
+import random
+import pygame
+pygame.init()
+
+listapari = [0, 2, 4, 6, 8]
+listadispari = [1, 3, 5, 7, 9]
+
+sfondo1 = pygame.image.load('backg.png')
+screen = pygame.display.set_mode((700, 400))
+running = True
+pygame.display.set_caption("Pallinuz")
+icon = pygame.image.load('pallinonormal.png')
+pygame.display.set_icon(icon)
+
+monsterImg = pygame.image.load('monster1.png')
+monsterY = 220
+monsterX = 600
+monsterX_change = 0
+DEFAULT_IMAGE_SIZE = (64, 64)
+monsterImg = pygame.transform.scale(monsterImg, DEFAULT_IMAGE_SIZE)
+def monster(x, y):
+    screen.blit(monsterImg, (x, y))
+
+gameoverImg = pygame.image.load("gameover.png")
+gameoverY = -1000
+gameoverX = 50
+def gameover(x, y):
+    screen.blit(gameoverImg, (x, y))
+
+font = pygame.font.Font('freesansbold.ttf', 32)
+textX = 10
+textY = -1000
+def text(x, y):
+    text = font.render('press "R" to restart', True, (0,0,0))
+    screen.blit(text, (x,y))
+
+
+playerImg = pygame.image.load('pallinonormal.png')
+playerX = 200
+playerY = 220
+playerX_change = 0
+playerY_change = 0
+def player(x, y):
+    screen.blit(playerImg, (x, y))
+
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            open("dead", "w").write("")
+            open("velocity", "w").write("")
+            running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT:
+                playerX_change = -1
+
+            if event.key == pygame.K_RIGHT:
+                playerX_change = 1
+
+            if event.key == pygame.K_UP:
+                open("velocity", "w").write("up")
+
+            if event.key == pygame.K_w:
+                running = False
+
+            if event.key == pygame.K_r:
+                open("dead", "w").write("")
+                open("velocity", "w").write("")
+                monsterX = 700
+                playerX = 200
+                playerY = 220
+                playerY_change = 0
+                playerX_change = 0
+                gameoverY = -1000
+                textY = -1000
+
+
+
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_LEFT:
+                    playerX_change = 0
+            if event.key == pygame.K_RIGHT:
+                playerX_change = 0
+
+
+    screen.fill((255, 203, 255))
+    monsterX_change = -1
+    if open("dead", "r").read()=="":
+        if monsterX == -50:
+            monsterX = 700
+        if playerX<11:
+            playerX = 11
+        if playerX>650:
+            playerX = 650
+        if open("velocity", "r").read() == "up":
+            if 121<playerY:
+                playerY_change=(120-playerY)/22
+            if int(playerY)==135:
+                open("velocity", "w").write("down")
+        if open("velocity", "r").read() == "down":
+            if int(playerY)<220:
+                playerY_change = -(120 - playerY) / 22
+            else:
+                open("velocity", "w").write("")
+                playerY_change = 0
+                playerY = 220
+        if playerY == 220:
+            if int(str(playerX)[-2]) in listapari:
+                playerImg = pygame.image.load('pallino2.png')
+            if int(str(playerX)[-2]) in listadispari:
+                playerImg = pygame.image.load('pallinonormal.png')
+
+        if monsterX<10:
+            monsterImg = pygame.image.load('monster2.png')
+        if monsterX>=10:
+            if int(str(monsterX)[-2]) in listapari:
+                monsterImg = pygame.image.load('monster2.png')
+            if int(str(monsterX)[-2]) in listadispari:
+                monsterImg = pygame.image.load('monster1.png')
+
+        if playerY-monsterY>-40:
+            if abs(playerX-monsterX)<35:
+                open("dead", "w").write("yes")
+    if open("dead", "r").read()=="yes":
+        playerImg = pygame.image.load('pallinocry.png')
+        monsterX_change=0
+        playerX_change=0
+        playerY_change=1
+        if playerY>270:
+            gameoverY = 50
+            gameoverX = 50
+            textY = 20
+
+
+
+
+
+
+
+
+
+
+
+    screen.blit(sfondo1,(0,0))
+    #playerY += playerY_change
+    playerX += playerX_change
+    playerY += playerY_change
+    monster(monsterX, monsterY)
+    player(playerX, playerY)
+    gameover(gameoverX, gameoverY)
+    text(textX, textY)
+    monsterX += monsterX_change
+    pygame.display.update()
